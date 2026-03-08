@@ -24,7 +24,7 @@ class EventEmitter {
     // 复制一份，防止在回调中 off 影响遍历
     const tasks = [...this.events[name]];
     for (const t of tasks) {
-      t(...args);
+      t.call(this, ...args);
     }
   }
 
@@ -44,7 +44,7 @@ class EventEmitter {
 
   once(name, fn) {
     const wrappedFn = (...args) => {
-      fn(...args);
+      fn.apply(this, args);
       this.off(name, wrappedFn);
     }
 
