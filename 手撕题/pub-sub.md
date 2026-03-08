@@ -18,25 +18,28 @@ class EventEmitter {
     }
   }
 
-  emit(name, once = false, ...args) {
+  emit(name, ...args) {
     if (!this.events[name]) return;
 
-    const tasks = this.events[name];
+    // 复制一份，防止在回调中 off 影响遍历
+    const tasks = [...this.events[name]];
     for (const t of tasks) {
       t(...args);
     }
-    
-    if (once) delete this.events[name];
   }
 
   off(name, fn) {
     if (!this.events[name]) return;
+    if (!fn) {
+      delete this.events[name];
+      return;
+    }
 
-    const tasks = this.events[name];
-    const index = tasks.findIndex(t => t === fn);
-    if (index === -1) return;
+    this.events[name] = this.events[name].filter(f => f !== fn);
 
-    tasks.splice(index, 1);
+    if (this.events[name].length === 0) {
+      delete this.events[name];
+    }
   }
 
   once(name, fn) {
